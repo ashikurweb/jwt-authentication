@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
 use App\Services\AuthService;
 use App\Traits\ApiResponse;
 use App\Traits\AuthResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -37,6 +40,65 @@ class AuthController extends Controller
         } catch (Exception $e) {
             return $this->errorResponse('Registration failed: ' . $e->getMessage(), 500);
         }
+    }
+    /**
+     * Forgot Password - Request OTP
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        try {
+            $this->authService->forgotPassword($request->identity);
+            return $this->successResponse(null, 'Password reset code sent to your email.');
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 404);
+        }
+    }
+
+    /**
+     * Reset Password using OTP
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        try {
+            $status = $this->authService->resetPassword(
+                $request->identity,
+                $request->otp,
+                $request->password
+            );
+
+            return $status 
+                ? $this->successResponse(null, 'Password reset successful. You can now login.')
+                : $this->errorResponse('Invalid or expired OTP', 422);
+        } catch (Exception $e) {
+            return $this->errorResponse('Reset failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Enable/Disable 2FA
+     */
+    public function toggle2fa(Request $request): JsonResponse
+    {
+        $request->validate(['enable' => 'required|boolean']);
+        $this->authService->toggle2FA(auth('api')->user(), $request->enable);
+        
+        $message = $request->enable ? '2FA enabled successfully' : '2FA disabled successfully';
+        return $this->successResponse(null, $message);
+    }
+
+    /**
+     * Verify 2FA Login
+     */
+    public function verify2fa(Request $request): JsonResponse
+    {
+        $request->validate(['otp' => 'required|string|size:6']);
+        $user = auth('api')->user(); 
+        
+        $token = $this->authService->verify2fa($user, $request->otp);
+        
+        return $token 
+            ? $this->respondWithToken($token, $user, '2FA verification successful')
+            : $this->errorResponse('Invalid or expired 2FA code', 422);
     }
 
     /**
@@ -82,21 +144,24 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         try {
-            $token = $this->authService->login($request->validated());
-            return $token 
-                ? $this->respondWithToken($token, auth('api')->user(), 'Login successful')
-                : $this->errorResponse('Invalid credentials', 401);
-        } catch (Exception $e) {
-            // Check if it's a verification error
-            if (str_contains($e->getMessage(), 'not verified')) {
-                // We still give a token so they can call the verify route
-                $user = User::where('email', $request->identity)
-                    ->orWhere('username', $request->identity)
-                    ->orWhere('phone', $request->identity)
-                    ->first();
-                $token = $this->authService->generateToken($user);
-                return $this->respondWithToken($token, $user, $e->getMessage(), 403);
+            $result = $this->authService->login($request->validated());
+            
+            switch ($result['status']) {
+                case 'success':
+                    return $this->respondWithToken($result['token'], $result['user'], 'Login successful');
+                
+                case '2fa_required':
+                    $token = $this->authService->generateToken($result['user']);
+                    return $this->respondWithToken($token, $result['user'], '2FA code sent to your email.', 200);
+
+                case 'unverified':
+                    $token = $this->authService->generateToken($result['user']);
+                    return $this->respondWithToken($token, $result['user'], 'Email not verified.', 403);
+                
+                default:
+                    return $this->errorResponse($result['message'], 401);
             }
+        } catch (Exception $e) {
             return $this->errorResponse('Login failed: ' . $e->getMessage(), 500);
         }
     }

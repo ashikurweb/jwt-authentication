@@ -12,11 +12,15 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
     // Protected Routes (JWT required)
     Route::middleware('auth.jwt')->group(function () {
         Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
         Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+        Route::post('/toggle-2fa', [AuthController::class, 'toggle2fa']);
+        Route::post('/verify-2fa', [AuthController::class, 'verify2fa']);
 
         // Routes that require verified email
         Route::middleware('verified.api')->group(function () {
