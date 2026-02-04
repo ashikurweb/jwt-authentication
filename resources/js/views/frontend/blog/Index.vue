@@ -1,119 +1,235 @@
 <template>
-  <div class="pt-32 pb-40 px-6">
-    <div class="max-w-7xl mx-auto space-y-24">
-        <!-- Header -->
-        <div class="text-center space-y-6 max-w-3xl mx-auto">
-            <h4 class="text-xs font-black text-indigo-600 uppercase tracking-[0.4em] animate-in fade-in slide-in-from-bottom-4 duration-500">Technical Intelligence</h4>
-            <h1 class="text-5xl md:text-7xl font-black theme-text-main tracking-tighter leading-none animate-in fade-in slide-in-from-bottom-8 duration-700">Nexus Insight <br /> Analytics</h1>
-            <p class="theme-text-dim text-lg md:text-xl font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-10 duration-1000">Deep dives into systems architecture, engineering philosophy, and the future of technical education.</p>
+  <div class="min-h-screen">
+    <!-- Blog Hero Header -->
+    <section class="relative pt-40 pb-20 overflow-hidden">
+      <div class="absolute inset-0 pointer-events-none -z-10 bg-dot-pattern opacity-30"></div>
+      <div class="absolute top-0 right-0 w-[40%] h-full bg-linear-to-l from-indigo-600/10 to-transparent blur-[100px] -z-10"></div>
+      
+      <div class="max-w-[1600px] mx-auto px-8 md:px-16">
+        <div class="max-w-4xl space-y-8">
+          <div class="flex items-center gap-4">
+            <div class="h-[2px] w-12 bg-indigo-600"></div>
+            <span class="text-[11px] font-black uppercase tracking-[0.5em] theme-text-main">Digital Journal</span>
+          </div>
+          <h1 class="text-7xl md:text-9xl font-black theme-text-main tracking-tighter leading-[0.85]">
+            Technical <span class="text-indigo-600">Blog</span>
+          </h1>
+          <p class="text-xl md:text-2xl theme-text-dim font-medium leading-relaxed max-w-2xl">
+            Deep dives into cloud orchestration, distributed architectures, and elite security protocols. Pure technical excellence.
+          </p>
         </div>
+      </div>
+    </section>
 
-        <!-- Featured Article -->
-        <div class="group relative rounded-[4rem] overflow-hidden border theme-border theme-bg-card hover:shadow-3xl transition-all duration-700 cursor-pointer animate-in fade-in slide-in-from-bottom-12 duration-1000">
-            <div class="flex flex-col lg:flex-row items-center">
-                <div class="w-full lg:w-3/5 h-[400px] lg:h-[600px] overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]">
-                </div>
-                <div class="w-full lg:w-2/5 p-12 md:p-20 space-y-8">
-                    <div class="flex items-center gap-4">
-                        <span class="px-3 py-1 bg-indigo-500/10 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">Featured Analysis</span>
-                        <span class="theme-text-dim text-[10px] font-black uppercase tracking-widest">March 24, 2026</span>
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-black theme-text-main tracking-tighter leading-tight">The Zero-Trust Era: Reforming Enterprise Identity</h2>
-                    <p class="theme-text-dim text-lg leading-relaxed font-medium">An exhaustive exploration of decentralized trust protocols and their implementation in hyperscale cloud environments.</p>
-                    <div class="flex items-center gap-4 pt-4 border-t theme-border">
-                        <img src="https://i.pravatar.cc/100?u=a" class="w-12 h-12 rounded-2xl border theme-border">
-                        <div>
-                            <p class="text-sm font-black theme-text-main uppercase tracking-widest">Alex Rivera</p>
-                            <p class="text-[10px] font-bold theme-text-dim uppercase tracking-widest mt-1">Lead Systems Engineer</p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Featured Post -->
+    <section class="px-8 md:px-16 pb-20">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="group relative rounded-[4rem] overflow-hidden theme-bg-card border-2 theme-border hover:border-indigo-500/30 transition-all duration-700 shadow-xl hover:shadow-4xl">
+          <div class="grid grid-cols-1 lg:grid-cols-2">
+            <div class="relative h-80 lg:h-auto overflow-hidden">
+              <img :src="featuredPost.image" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-[2s]">
+              <div class="absolute inset-0 bg-linear-to-r from-black/60 to-transparent lg:hidden"></div>
             </div>
+            <div class="p-12 lg:p-16 flex flex-col justify-center space-y-8">
+              <div class="flex items-center gap-4">
+                <span class="px-4 py-1.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg">Featured</span>
+                <span class="text-[10px] font-black theme-text-dim uppercase tracking-widest">{{ featuredPost.category }}</span>
+              </div>
+              <h2 class="text-4xl lg:text-5xl font-black theme-text-main tracking-tighter leading-[1.1] group-hover:text-indigo-600 transition-colors">
+                {{ featuredPost.title }}
+              </h2>
+              <p class="theme-text-dim text-lg font-medium leading-relaxed">{{ featuredPost.excerpt }}</p>
+              <div class="flex items-center justify-between pt-6 border-t theme-border">
+                <div class="flex items-center gap-4">
+                  <img :src="featuredPost.author.avatar" class="w-12 h-12 rounded-2xl border-2 theme-border object-cover">
+                  <div>
+                    <p class="text-sm font-black theme-text-main">{{ featuredPost.author.name }}</p>
+                    <p class="text-[10px] font-bold theme-text-dim uppercase tracking-widest">{{ featuredPost.date }} · {{ featuredPost.readTime }}</p>
+                  </div>
+                </div>
+                <router-link :to="`/blog/${featuredPost.slug}`" class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-500 transition-all shadow-xl hover:scale-110 active:scale-90">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </router-link>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Blog Grid -->
+    <!-- Category Filter -->
+    <section class="px-8 md:px-16 pb-16">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="flex flex-wrap items-center gap-4">
+          <button 
+            v-for="cat in categories" 
+            :key="cat.slug"
+            @click="activeCategory = cat.slug"
+            class="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2"
+            :class="activeCategory === cat.slug 
+              ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-600/20' 
+              : 'theme-bg-card theme-border theme-text-main hover:border-indigo-500/30'"
+          >
+            {{ cat.name }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Posts Grid -->
+    <section class="px-8 md:px-16 pb-40">
+      <div class="max-w-[1600px] mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            <div v-for="post in posts" :key="post.title" class="group space-y-8 cursor-pointer">
-                <div class="aspect-video rounded-[2.5rem] overflow-hidden border theme-border shadow-sm group-hover:shadow-2xl transition-all duration-500">
-                    <img :src="post.image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+          <router-link 
+            v-for="post in posts" 
+            :key="post.id"
+            :to="`/blog/${post.slug}`"
+            class="group theme-bg-card border-2 theme-border rounded-[3rem] overflow-hidden hover:border-indigo-500/30 hover:shadow-4xl transition-all duration-700 hover:-translate-y-4"
+          >
+            <!-- Post Image -->
+            <div class="h-64 relative overflow-hidden">
+              <img :src="post.image" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[1.5s]">
+              <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div class="absolute top-6 left-6">
+                <span class="px-4 py-1.5 bg-white/10 backdrop-blur-xl text-white text-[9px] font-black uppercase tracking-widest rounded-lg border border-white/20">{{ post.category }}</span>
+              </div>
+              <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between text-white">
+                <span class="text-[10px] font-bold opacity-70">{{ post.readTime }}</span>
+                <div class="flex items-center gap-2 text-[10px] font-bold opacity-70">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  {{ post.views }}
                 </div>
-                <div class="space-y-4 px-2">
-                    <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                        <span class="text-indigo-600">{{ post.category }}</span>
-                        <span class="theme-text-dim">{{ post.readTime }}</span>
-                    </div>
-                    <h3 class="text-2xl font-black theme-text-main tracking-tight group-hover:text-indigo-600 transition-colors leading-tight">{{ post.title }}</h3>
-                    <p class="theme-text-dim text-sm font-medium leading-relaxed line-clamp-3">{{ post.excerpt }}</p>
-                </div>
+              </div>
             </div>
+
+            <!-- Post Content -->
+            <div class="p-10 space-y-6">
+              <h3 class="text-2xl font-black theme-text-main group-hover:text-indigo-600 transition-colors tracking-tight leading-[1.2]">{{ post.title }}</h3>
+              <p class="theme-text-dim text-sm font-medium leading-relaxed line-clamp-3">{{ post.excerpt }}</p>
+              
+              <div class="pt-6 border-t theme-border flex items-center gap-4">
+                <img :src="post.author.avatar" class="w-10 h-10 rounded-xl border-2 theme-border object-cover">
+                <div class="flex-1">
+                  <p class="text-xs font-black theme-text-main">{{ post.author.name }}</p>
+                  <p class="text-[9px] font-bold theme-text-dim uppercase tracking-widest mt-1">{{ post.date }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl theme-bg-element border-2 theme-border flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </div>
+              </div>
+            </div>
+          </router-link>
         </div>
 
-        <!-- Newsletter Section -->
-        <div class="rounded-[4rem] bg-indigo-600 p-12 md:p-24 text-center space-y-10 relative overflow-hidden shadow-3xl">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent_70%)]"></div>
-            <div class="relative z-10 space-y-6 max-w-2xl mx-auto text-white">
-                <h2 class="text-4xl md:text-6xl font-black tracking-tighter leading-none">Subscribe to Intel.</h2>
-                <p class="text-indigo-100 text-lg font-medium opacity-80">Join 15,000+ engineers receiving our weekly deep-dives on systems architecture.</p>
-                <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
-                    <input type="email" placeholder="Enter your work email" class="w-full flex-1 px-8 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:bg-white/20 transition-all font-bold">
-                    <button class="w-full sm:w-auto px-10 py-5 bg-white text-indigo-600 rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-xl">Join Now</button>
-                </div>
-            </div>
+        <!-- Load More -->
+        <div class="text-center pt-20">
+          <button class="px-12 py-6 border-2 theme-border theme-text-main rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
+            Load More Articles
+          </button>
         </div>
-    </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-const posts = [
-  { 
-    title: "The Death of Traditional MVC: Moving to Event-Driven Systems", 
-    category: "Architecture", 
-    readTime: "8 min read", 
-    excerpt: "Why modern technical stacks are moving away from synchronous request-response patterns toward resilient event streaming architectures.", 
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800" 
-  },
-  { 
-    title: "Design Ethics in the Age of Autonomous Algorithms", 
-    category: "Philosophy", 
-    readTime: "12 min read", 
-    excerpt: "A critical look at how human-centric design values intersect with black-box algorithmic decision making in modern product engineering.", 
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800" 
-  },
-  { 
-    title: "Scaling Distributed Databases: Lessons from the Edge", 
-    category: "Data Systems", 
-    readTime: "15 min read", 
-    excerpt: "Practical insights on maintaining consistency and availability across geographically distributed data clusters.", 
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=800" 
-  },
-  { 
-    title: "The UI of Infrastructure: How Developers Experience Cloud", 
-    category: "Product", 
-    readTime: "6 min read", 
-    excerpt: "Analyzing why developer experience (DX) is becoming the most critical competitive advantage for cloud infrastructure companies.", 
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800" 
-  },
-  { 
-    title: "Compiler Optimizations in 2026: What's Next?", 
-    category: "Languages", 
-    readTime: "10 min read", 
-    excerpt: "A technical review of recent breakthroughs in LLVM and JIT compilation strategies for high-performance systems.", 
-    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=format&fit=crop&q=80&w=800" 
-  },
-  { 
-    title: "Security by Design: Building Fortress-Grade APIs", 
-    category: "Security", 
-    readTime: "9 min read", 
-    excerpt: "Implementing advanced authentication and authorization patterns at the gateway level for enterprise-grade security.", 
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800" 
+import { ref } from 'vue';
+
+const activeCategory = ref('all');
+
+const categories = [
+  { name: 'All Posts', slug: 'all' },
+  { name: 'Engineering', slug: 'engineering' },
+  { name: 'Cloud', slug: 'cloud' },
+  { name: 'Security', slug: 'security' },
+  { name: 'DevOps', slug: 'devops' },
+];
+
+const featuredPost = {
+  id: 1,
+  title: 'The Architecture of Global Scale Distributed Databases',
+  slug: 'architecture-global-scale-distributed-databases',
+  excerpt: 'Exploring the fundamental principles behind building databases that can handle millions of requests per second across multiple continents while maintaining consistency and availability.',
+  category: 'Engineering',
+  image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=1600',
+  date: 'Feb 4, 2026',
+  readTime: '12 min read',
+  author: {
+    name: 'Dr. Helena Ray',
+    avatar: 'https://i.pravatar.cc/100?u=helena'
   }
+};
+
+const posts = [
+  {
+    id: 2,
+    title: 'Zero Trust Security in Multi-Cloud Ecosystems',
+    slug: 'zero-trust-security-multi-cloud',
+    excerpt: 'How to implement a comprehensive zero-trust security model across AWS, GCP, and Azure environments.',
+    category: 'Security',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800',
+    date: 'Feb 3, 2026',
+    readTime: '8 min',
+    views: '2.4K',
+    author: { name: 'Xavier Vance', avatar: 'https://i.pravatar.cc/100?u=xavier' }
+  },
+  {
+    id: 3,
+    title: 'Event-Driven Architecture: Beyond Microservices',
+    slug: 'event-driven-architecture-beyond-microservices',
+    excerpt: 'Why event-driven patterns are becoming the backbone of modern distributed systems.',
+    category: 'Engineering',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+    date: 'Feb 2, 2026',
+    readTime: '15 min',
+    views: '5.1K',
+    author: { name: 'Marcus Jin', avatar: 'https://i.pravatar.cc/100?u=marcus' }
+  },
+  {
+    id: 4,
+    title: 'Kubernetes at Scale: Lessons from Production',
+    slug: 'kubernetes-at-scale-lessons-production',
+    excerpt: 'Real-world insights from managing 500+ Kubernetes clusters in enterprise environments.',
+    category: 'DevOps',
+    image: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&q=80&w=800',
+    date: 'Feb 1, 2026',
+    readTime: '10 min',
+    views: '3.8K',
+    author: { name: 'Sarah Chen', avatar: 'https://i.pravatar.cc/100?u=sarah' }
+  },
+  {
+    id: 5,
+    title: 'The Future of Serverless Computing',
+    slug: 'future-serverless-computing',
+    excerpt: 'Analyzing the trajectory of serverless platforms and what it means for cloud architecture.',
+    category: 'Cloud',
+    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800',
+    date: 'Jan 30, 2026',
+    readTime: '7 min',
+    views: '1.9K',
+    author: { name: 'Dr. Helena Ray', avatar: 'https://i.pravatar.cc/100?u=helena' }
+  },
+  {
+    id: 6,
+    title: 'GraphQL vs REST: A Technical Deep Dive',
+    slug: 'graphql-vs-rest-technical-deep-dive',
+    excerpt: 'Comparing performance, flexibility, and use cases for both API paradigms.',
+    category: 'Engineering',
+    image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800',
+    date: 'Jan 28, 2026',
+    readTime: '11 min',
+    views: '4.2K',
+    author: { name: 'Xavier Vance', avatar: 'https://i.pravatar.cc/100?u=xavier' }
+  },
 ];
 </script>
 
 <style scoped>
-.shadow-3xl {
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.4), 0 30px 60px -30px rgba(79, 70, 229, 0.2);
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(79, 70, 229, 0.15) 1.5px, transparent 1.5px);
+  background-size: 60px 60px;
+}
+.shadow-4xl {
+  box-shadow: 0 60px 100px -20px rgba(0, 0, 0, 0.4), 0 30px 60px -30px rgba(79, 70, 229, 0.2);
 }
 </style>

@@ -26,6 +26,11 @@ const routes = [
                 component: () => import('../views/frontend/blog/Index.vue')
             },
             {
+                path: 'blog/:slug',
+                name: 'frontend.blog.show',
+                component: () => import('../views/frontend/blog/Show.vue')
+            },
+            {
                 path: 'login',
                 name: 'login',
                 component: () => import('../components/common/PlaceholderView.vue')

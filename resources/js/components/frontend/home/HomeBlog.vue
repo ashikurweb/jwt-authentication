@@ -18,14 +18,19 @@
                 </router-link>
             </div>
             <div class="grid grid-cols-1 gap-8 revealer-up-blog opacity-0">
-                <div v-for="post in blogPosts" :key="post.title" class="p-10 rounded-[3rem] theme-bg-main border-2 theme-border hover:border-indigo-500/30 transition-all cursor-pointer group/card shadow-sm hover:shadow-2xl">
+                <router-link 
+                    v-for="post in blogPosts" 
+                    :key="post.title" 
+                    :to="`/blog/${post.slug}`"
+                    class="p-10 rounded-[3rem] theme-bg-main border-2 theme-border hover:border-indigo-500/30 transition-all cursor-pointer group/card shadow-sm hover:shadow-2xl block"
+                >
                     <div class="flex items-center gap-6 mb-6">
                         <span class="text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em]">{{ post.category }}</span>
                         <div class="h-px flex-1 bg-indigo-600/20"></div>
                         <span class="text-[9px] font-black theme-text-dim uppercase tracking-widest">{{ post.readTime }} Read</span>
                     </div>
                     <h3 class="text-2xl font-black theme-text-main group-hover/card:text-indigo-600 transition-colors tracking-tight leading-tight">{{ post.title }}</h3>
-                </div>
+                </router-link>
             </div>
         </div>
     </div>
@@ -40,9 +45,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const blogPosts = [
-    { title: "The Architecture of Global Scale Distributed Databases", category: "Engine", readTime: "12 min" },
-    { title: "Zero Trust Security in Multi-Cloud Ecosystems", category: "Security", readTime: "8 min" },
-    { title: "Event-Driven Logic: Beyond Microservices", category: "Logic", readTime: "15 min" },
+    { title: "The Architecture of Global Scale Distributed Databases", slug: "architecture-global-scale-distributed-databases", category: "Engine", readTime: "12 min" },
+    { title: "Zero Trust Security in Multi-Cloud Ecosystems", slug: "zero-trust-security-multi-cloud", category: "Security", readTime: "8 min" },
+    { title: "Event-Driven Logic: Beyond Microservices", slug: "event-driven-architecture-beyond-microservices", category: "Logic", readTime: "15 min" },
 ];
 
 onMounted(() => {
