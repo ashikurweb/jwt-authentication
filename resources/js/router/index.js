@@ -33,13 +33,33 @@ const routes = [
             {
                 path: 'login',
                 name: 'login',
-                component: () => import('../components/common/PlaceholderView.vue')
+                component: () => import('../views/frontend/auth/Login.vue'),
+                meta: { guest: true }
+            },
+            {
+                path: 'register',
+                name: 'register',
+                component: () => import('../views/frontend/auth/Register.vue'),
+                meta: { guest: true }
+            },
+            {
+                path: 'verify-email',
+                name: 'verify-email',
+                component: () => import('../views/frontend/auth/VerifyEmail.vue'),
+                meta: { auth: true }
+            },
+            {
+                path: 'my-account',
+                name: 'profile',
+                component: () => import('../views/frontend/user/Profile.vue'),
+                meta: { auth: true } // Requires login, but is a frontend route
             }
         ]
     },
     {
         path: '/admin',
         component: () => import('../layouts/DashboardLayout.vue'),
+        meta: { auth: true, admin: true }, // Add admin meta requirement
         children: [
             { path: 'dashboard', name: 'dashboard', component: () => import('../views/admin/dashboard/Index.vue') },
             // Learning
@@ -66,6 +86,52 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+// Navigation Guard
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('auth_token');
+    const user = JSON.parse(localStorage.getItem('auth_user') || 'null');
+
+    // Helper to check for admin role
+    const isAdmin = () => {
+        return user?.roles?.some(role => ['admin', 'super-admin'].includes(role.name));
+    };
+
+    // 1. Route Requires Authentication
+    if (to.matched.some(record => record.meta.auth)) {
+        if (!token) {
+            next({ name: 'login' });
+        }
+        // 2. Route Requires Admin Privileges (e.g., /admin/*)
+        else if (to.matched.some(record => record.meta.admin)) {
+            if (isAdmin()) {
+                next();
+            } else {
+                // User is logged in but NOT admin -> Send to frontend User Profile
+                next({ name: 'profile' });
+            }
+        }
+        else {
+            next();
+        }
+    }
+    // 3. Guest Routes (Login/Register) - Redirect logged-in users
+    else if (to.matched.some(record => record.meta.guest)) {
+        if (token) {
+            // Redirect based on role
+            if (isAdmin()) {
+                next({ name: 'dashboard' });
+            } else {
+                next({ name: 'profile' });
+            }
+        } else {
+            next();
+        }
+    }
+    else {
+        next();
+    }
 });
 
 export default router;

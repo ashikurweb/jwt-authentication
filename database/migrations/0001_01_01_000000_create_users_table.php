@@ -13,20 +13,32 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique()->index();
             $table->string('name');
-            $table->string('username')->unique()->nullable();
-            $table->string('email')->unique();
-            $table->string('phone')->unique()->nullable();
+            $table->string('username')->unique()->index();
+            $table->string('email')->unique()->index();
+            $table->string('phone')->unique()->nullable()->index();
+            
+            $table->string('avatar')->nullable();
+            $table->string('bio', 500)->nullable();
+            
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
             $table->string('password');
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
+            
+            // Security & Settings
             $table->enum('status', ['active', 'inactive', 'suspended', 'blocked', 'pending'])->default('pending')->index();
             $table->boolean('two_factor_enabled')->default(false);
             $table->string('two_factor_secret')->nullable();
             $table->text('two_factor_recovery_codes')->nullable();
-            $table->rememberToken();
+            
+            // Preferences for Global Scaling
+            $table->string('language', 5)->default('en')->index();
+            $table->string('timezone')->default('UTC');
+            
+            $table->rememberToken(); // Kept for Hybrid Web Support (Best Practice)
             $table->timestamps();
             
             // Audit & Extra

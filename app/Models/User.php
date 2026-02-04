@@ -21,14 +21,19 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
+        'uuid',
         'name',
         'username',
         'email',
         'phone',
+        'avatar',
+        'bio',
         'password',
         'otp',
         'otp_expires_at',
         'status',
+        'language',
+        'timezone',
         'email_verified_at',
         'phone_verified_at',
         'last_login_at',
@@ -45,6 +50,8 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'password',
         'otp',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -61,7 +68,20 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'meta' => 'array',
+            'two_factor_enabled' => 'boolean',
         ];
+    }
+
+    /**
+     * Auto-generate UUID on creation
+     */
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
     }
 
     public function getJWTIdentifier()
