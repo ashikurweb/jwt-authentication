@@ -14,10 +14,9 @@
     </div>
 
     <div class="flex items-center gap-2 md:gap-4">
-      <!-- Search -->
-      <div class="hidden md:flex relative group">
-        <input type="text" placeholder="Search anything..." class="w-64 pl-10 pr-4 py-2 theme-bg-element border border-transparent theme-border rounded-xl text-sm transition-all focus:w-80 focus:theme-bg-card focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 theme-text-main shadow-inner">
-        <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <!-- Search Component -->
+      <div class="hidden lg:block flex-1 max-w-md mx-8">
+        <GlobalSearch />
       </div>
 
       <!-- Theme Toggle -->
@@ -54,6 +53,7 @@
 
 <script setup>
 import { useTheme } from '../../composables/useTheme';
+import GlobalSearch from '../common/GlobalSearch.vue';
 
 const { theme, toggleTheme } = useTheme();
 
