@@ -1,0 +1,1 @@
+<template><div class="pt-32 px-6 max-w-7xl mx-auto min-h-screen text-center"><h1 class="text-6xl font-black theme-text-main tracking-tighter">Elite Instructors</h1><p class="theme-text-dim mt-4 text-xl">Learn from the architects of modern technology.</p></div></template>

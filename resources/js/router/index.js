@@ -3,7 +3,34 @@ import { createRouter, createWebHistory } from 'vue-router';
 const routes = [
     {
         path: '/',
-        redirect: '/admin/dashboard'
+        component: () => import('../layouts/frontend/FrontendLayout.vue'),
+        children: [
+            {
+                path: '',
+                name: 'home',
+                component: () => import('../views/frontend/home/Index.vue')
+            },
+            {
+                path: 'courses',
+                name: 'frontend.courses',
+                component: () => import('../views/frontend/courses/Index.vue')
+            },
+            {
+                path: 'instructors',
+                name: 'frontend.instructors',
+                component: () => import('../views/frontend/instructors/Index.vue')
+            },
+            {
+                path: 'blog',
+                name: 'frontend.blog',
+                component: () => import('../views/frontend/blog/Index.vue')
+            },
+            {
+                path: 'login',
+                name: 'login',
+                component: () => import('../components/common/PlaceholderView.vue')
+            }
+        ]
     },
     {
         path: '/admin',

@@ -1,0 +1,1 @@
+<template><div class="pt-32 px-6 max-w-7xl mx-auto min-h-screen text-center"><h1 class="text-6xl font-black theme-text-main tracking-tighter">Academic Curriculum</h1><p class="theme-text-dim mt-4 text-xl">Explore our technical modules and certifications.</p></div></template>
