@@ -80,6 +80,9 @@ const routes = [
             { path: 'bundles', name: 'bundles', component: () => import('../views/admin/bundles/Index.vue') },
             { path: 'assignments', name: 'assignments', component: () => import('../views/admin/assignments/Index.vue') },
             { path: 'quizzes', name: 'quizzes', component: () => import('../views/admin/quizzes/Index.vue') },
+            // Blog
+            { path: 'blog/categories', name: 'blog-categories', component: () => import('../views/admin/blog-categories/Index.vue') },
+            { path: 'blog/posts', name: 'blog-posts', component: () => import('../views/admin/blog-posts/Index.vue') },
             // Users
             { path: 'users', name: 'users', component: () => import('../views/admin/users/Index.vue') },
             { path: 'instructors', name: 'instructors', component: () => import('../views/admin/instructors/Index.vue') },

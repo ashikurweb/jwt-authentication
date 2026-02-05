@@ -30,3 +30,9 @@ Route::prefix('auth')->group(function () {
         });
     });
 });
+
+// Admin Routes
+Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
+    Route::get('/blog-categories/all', [\App\Http\Controllers\Api\Admin\BlogCategoryController::class, 'getAll']);
+    Route::apiResource('blog-categories', \App\Http\Controllers\Api\Admin\BlogCategoryController::class);
+});

@@ -5,10 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasSlug;
 
 class BlogCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasSlug;
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $fillable = [
         'name',
@@ -18,7 +27,6 @@ class BlogCategory extends Model
         'icon',
         'color',
         'parent_id',
-        'order',
         'is_active',
         'is_featured',
         'meta_title',
@@ -28,7 +36,6 @@ class BlogCategory extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
-        'order' => 'integer',
     ];
 
     // Relationships
@@ -39,7 +46,7 @@ class BlogCategory extends Model
 
     public function children()
     {
-        return $this->hasMany(BlogCategory::class, 'parent_id')->orderBy('order');
+        return $this->hasMany(BlogCategory::class, 'parent_id');
     }
 
     public function posts()
@@ -63,10 +70,14 @@ class BlogCategory extends Model
         return $query->whereNull('parent_id');
     }
 
-    public function scopeOrdered($query)
+    public function scopeSearch($query, $search)
     {
-        return $query->orderBy('order');
+        return $query->where(function($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('description', 'LIKE', "%{$search}%");
+        });
     }
+
 
     // Accessors
     public function getPostsCountAttribute()

@@ -22,12 +22,37 @@ api.interceptors.request.use(config => {
 // Add a response interceptor to handle errors
 api.interceptors.response.use(response => {
     return response;
-}, error => {
-    if (error.response && error.response.status === 401) {
-        // Handle unauthorized error (e.g., redirect to login or refresh token)
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_user');
+}, async error => {
+    const originalRequest = error.config;
+
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+            // Call refresh endpoint to get a new token
+            const response = await axios.post('/api/auth/refresh', {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
+
+            const newToken = response.data.access_token;
+
+            // Update local storage
+            localStorage.setItem('auth_token', newToken);
+
+            // Update header and retry original request
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return api(originalRequest);
+        } catch (refreshError) {
+            // Handle refresh token failure (e.g., token already expired)
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            window.location.href = '/login';
+            return Promise.reject(refreshError);
+        }
     }
+
     return Promise.reject(error);
 });
 
