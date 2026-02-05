@@ -110,6 +110,11 @@ class BlogPost extends Model
         return $this->comments()->where('status', 'approved');
     }
 
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'blog_likes', 'post_id', 'user_id')->withTimestamps();
+    }
+
     // Scopes
     public function scopePublished($query)
     {

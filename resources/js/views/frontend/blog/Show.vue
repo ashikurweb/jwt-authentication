@@ -169,11 +169,20 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-wrap items-center justify-center gap-4 mt-12 py-8 border-t border-b border-slate-200 dark:border-slate-800">
-          <button class="inline-flex items-center gap-2 px-6 py-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm font-semibold rounded-full hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-            Like this article
+          <button 
+            @click="handleLike"
+            class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-full transition-colors"
+            :class="post.is_liked 
+              ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-[0_0_20px_rgba(244,63,94,0.4)]' 
+              : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20'"
+          >
+            <svg class="w-5 h-5" :class="{ 'fill-current': post.is_liked }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            {{ post.is_liked ? 'Liked' : 'Like this article' }}
           </button>
-          <button class="inline-flex items-center gap-2 px-6 py-3 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm font-semibold rounded-full hover:bg-violet-100 dark:hover:bg-violet-500/20 transition-colors">
+          <button 
+            @click="handleShare"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm font-semibold rounded-full hover:bg-violet-100 dark:hover:bg-violet-500/20 transition-colors"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
             Share article
           </button>
@@ -208,22 +217,88 @@
           </h2>
           
           <div v-if="post.allow_comments" class="bg-slate-50 dark:bg-[#111113] rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-6">
-            <div class="flex gap-4">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold shrink-0">U</div>
+            <div v-if="isAuthenticated" class="flex gap-4">
+              <img :src="user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=6366f1&color=fff`" class="w-10 h-10 rounded-full shadow-sm shrink-0">
               <div class="flex-1">
                 <textarea 
+                  v-model="newComment"
                   placeholder="Share your thoughts..." 
                   class="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all min-h-[100px] resize-none"
                 ></textarea>
                 <div class="mt-3 flex justify-end">
-                  <button class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-semibold rounded-full hover:shadow-lg hover:shadow-violet-500/30 transition-all">
+                  <button 
+                    @click="submitComment"
+                    :disabled="submittingComment || !newComment.trim()"
+                    class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-semibold rounded-full hover:shadow-lg hover:shadow-violet-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span v-if="submittingComment" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                     Post Comment
                   </button>
                 </div>
               </div>
             </div>
-            <div class="mt-8 text-center text-slate-400 text-sm py-8">
-              Be the first to share your thoughts on this article.
+            
+            <div v-else class="text-center py-6 bg-slate-100 dark:bg-slate-900/50 rounded-xl">
+              <p class="text-slate-500 dark:text-slate-400 mb-3">Please login to join the discussion.</p>
+              <router-link to="/login" class="inline-flex items-center px-6 py-2 bg-violet-600 text-white rounded-full text-sm font-semibold hover:bg-violet-700 transition-colors">
+                Login
+              </router-link>
+            </div>
+
+            <!-- Comments List -->
+            <div class="mt-10 space-y-8">
+                <div v-if="!post.comments?.length" class="text-center text-slate-400 text-sm py-8">
+                   Be the first to share your thoughts on this article.
+                </div>
+                
+                <div v-for="comment in post.comments" :key="comment.id" class="flex gap-4 group">
+                    <img :src="comment.author?.avatar || `https://ui-avatars.com/api/?name=${comment.author?.name}&background=random`" class="w-10 h-10 rounded-full shadow-sm shrink-0">
+                    <div class="flex-1">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ comment.author?.name }}</h4>
+                                <span class="text-xs text-slate-400">{{ formatDate(comment.created_at) }}</span>
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{{ comment.content }}</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 mt-2 pl-2">
+                             <button @click="replyingTo = replyingTo === comment.id ? null : comment.id" class="text-xs font-semibold text-slate-500 hover:text-violet-600 transition-colors">Reply</button>
+                        </div>
+
+                        <!-- Reply Form -->
+                        <div v-if="replyingTo === comment.id" class="mt-4 flex gap-3 animate-in fade-in slide-in-from-top-2">
+                             <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0"></div> <!-- Placeholder for current user avatar in reply -->
+                             <div class="flex-1">
+                                 <textarea 
+                                     v-model="replyContent"
+                                     placeholder="Write a reply..."
+                                     class="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 min-h-[80px]"
+                                 ></textarea>
+                                 <div class="mt-2 flex justify-end gap-2">
+                                     <button @click="replyingTo = null" class="px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">Cancel</button>
+                                     <button @click="submitReply(comment.id)" class="px-4 py-1.5 bg-violet-600 text-white text-xs font-bold rounded-lg hover:bg-violet-700">Reply</button>
+                                 </div>
+                             </div>
+                        </div>
+
+                        <!-- Replies List -->
+                        <div v-if="comment.replies?.length" class="mt-4 space-y-4 pl-4 border-l-2 border-slate-100 dark:border-slate-800">
+                            <div v-for="reply in comment.replies" :key="reply.id" class="flex gap-3">
+                                <img :src="reply.author?.avatar || `https://ui-avatars.com/api/?name=${reply.author?.name}&background=random`" class="w-8 h-8 rounded-full shadow-sm shrink-0">
+                                <div class="flex-1">
+                                     <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3">
+                                         <div class="flex items-center justify-between mb-1">
+                                             <h5 class="font-bold text-slate-900 dark:text-white text-xs">{{ reply.author?.name }}</h5>
+                                             <span class="text-[10px] text-slate-400">{{ formatDate(reply.created_at) }}</span>
+                                         </div>
+                                         <p class="text-slate-600 dark:text-slate-400 text-sm">{{ reply.content }}</p>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
           </div>
           <div v-else class="bg-slate-50 dark:bg-[#111113] rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-8 text-center">
@@ -254,14 +329,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { publicBlogService } from '../../../services/publicBlogService';
+import { useAuth } from '../../../composables/useAuth';
+import { useToast } from '../../../composables/useToast';
 
 const route = useRoute();
+const auth = useAuth();
+const toast = useToast();
+
 const post = ref(null);
 const loading = ref(true);
 const scrollProgress = ref(0);
+const newComment = ref('');
+const submittingComment = ref(false);
+const replyingTo = ref(null);
+const replyContent = ref('');
+
+const user = computed(() => auth.user.value);
+const isAuthenticated = computed(() => auth.isAuthenticated.value);
 
 const fetchPost = async () => {
   loading.value = true;
@@ -317,6 +404,111 @@ const updateScrollProgress = () => {
   const winHeight = window.innerHeight;
   const scrollPercent = (scrollTop / (docHeight - winHeight)) * 100;
   scrollProgress.value = Math.min(100, Math.max(0, scrollPercent));
+};
+
+const handleLike = async () => {
+  if (!isAuthenticated.value) {
+    toast.error('Please login to like this post');
+    return;
+  }
+  
+  try {
+    const response = await publicBlogService.likePost(post.value.slug);
+    post.value.is_liked = response.liked;
+    post.value.likes_count = response.likes_count;
+    if (response.liked) {
+      toast.success('You liked this post!');
+    }
+  } catch (error) {
+    toast.error('Failed to update like');
+  }
+};
+
+const handleShare = async () => {
+  try {
+    await publicBlogService.sharePost(post.value.slug);
+    post.value.shares_count++;
+    
+    // Copy link to clipboard
+    await navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard!');
+  } catch (error) {
+    toast.error('Failed to share post');
+  }
+};
+
+const submitComment = async () => {
+  if (!isAuthenticated.value) {
+    toast.error('Please login to comment');
+    return;
+  }
+  if (!newComment.value.trim()) return;
+
+  submittingComment.value = true;
+  try {
+    const response = await publicBlogService.commentOnPost(post.value.slug, {
+      content: newComment.value
+    });
+    
+    // Add new comment to top of list
+    const newCommentObj = {
+      ...response.data,
+      author: {
+        name: user.value.name,
+        avatar: user.value.avatar
+      },
+      created_at: new Date().toISOString()
+    };
+    
+    if (!post.value.comments) post.value.comments = [];
+    post.value.comments.unshift(newCommentObj);
+    post.value.comments_count++;
+    
+    newComment.value = '';
+    toast.success('Comment posted successfully');
+  } catch (error) {
+    toast.error('Failed to post comment');
+  } finally {
+    submittingComment.value = false;
+  }
+};
+
+const submitReply = async (commentId) => {
+  if (!isAuthenticated.value) {
+    toast.error('Please login to reply');
+    return;
+  }
+  if (!replyContent.value.trim()) return;
+
+  try {
+    const response = await publicBlogService.commentOnPost(post.value.slug, {
+      content: replyContent.value,
+      parent_id: commentId
+    });
+
+    // Find parent comment and add reply
+    const parentComment = post.value.comments.find(c => c.id === commentId);
+    if (parentComment) {
+       if (!parentComment.replies) parentComment.replies = [];
+       // Structure reply object
+       const replyObj = {
+         ...response.data,
+         author: {
+            name: user.value.name,
+            avatar: user.value.avatar
+         },
+         created_at: new Date().toISOString()
+       };
+       parentComment.replies.push(replyObj);
+       post.value.comments_count++;
+    }
+
+    replyingTo.value = null;
+    replyContent.value = '';
+    toast.success('Reply posted successfully');
+  } catch (error) {
+    toast.error('Failed to post reply');
+  }
 };
 
 onMounted(() => {

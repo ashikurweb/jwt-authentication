@@ -27,6 +27,7 @@ class BlogPostResource extends JsonResource
             'likes_count' => $this->likes_count,
             'comments_count' => $this->comments_count,
             'shares_count' => $this->shares_count,
+            'is_liked' => auth()->id() ? $this->likes()->where('user_id', auth()->id())->exists() : false,
             'author' => $this->whenLoaded('author', function() {
                 return [
                     'id' => $this->author->id,
@@ -35,6 +36,7 @@ class BlogPostResource extends JsonResource
             }),
             'category' => new BlogCategoryResource($this->whenLoaded('category')),
             'tags' => BlogTagResource::collection($this->whenLoaded('tags')),
+            'comments' => \App\Http\Resources\Api\BlogCommentResource::collection($this->whenLoaded('comments')),
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,

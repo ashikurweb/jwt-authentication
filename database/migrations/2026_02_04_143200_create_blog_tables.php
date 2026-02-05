@@ -125,6 +125,17 @@ return new class extends Migration
             $table->index(['post_id', 'status']);
             $table->index(['user_id', 'status']);
         });
+
+        // Blog Likes
+        Schema::create('blog_likes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained('blog_posts')->onDelete('cascade');
+            $table->timestamps();
+            
+            // Ensure unique like per user per post
+            $table->unique(['user_id', 'post_id']);
+        });
     }
 
     /**
@@ -132,6 +143,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('blog_likes');
         Schema::dropIfExists('blog_comments');
         Schema::dropIfExists('blog_post_tag');
         Schema::dropIfExists('blog_tags');

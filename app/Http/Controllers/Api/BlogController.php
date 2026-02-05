@@ -35,7 +35,12 @@ class BlogController extends Controller
     public function show($slug)
     {
         $post = BlogPost::query()
-            ->with(['author', 'category', 'tags'])
+            ->with(['author', 'category', 'tags', 'comments' => function($q) {
+                $q->where('status', 'approved')->whereNull('parent_id')
+                  ->with(['user', 'replies' => function($cq) {
+                      $cq->where('status', 'approved')->with('user');
+                  }]);
+            }])
             ->published()
             ->where('slug', $slug)
             ->firstOrFail();
@@ -72,5 +77,71 @@ class BlogController extends Controller
             ->get();
 
         return BlogPostResource::collection($posts);
+    }
+
+    /**
+     * Toggle like on a post.
+     */
+    public function like(Request $request, $slug)
+    {
+        $post = BlogPost::published()->where('slug', $slug)->firstOrFail();
+        $user = auth()->user();
+
+        if ($post->likes()->where('user_id', $user->id)->exists()) {
+            $post->likes()->detach($user->id);
+            $post->decrement('likes_count');
+            $liked = false;
+        } else {
+            $post->likes()->attach($user->id);
+            $post->increment('likes_count');
+            $liked = true;
+        }
+
+        return response()->json([
+            'liked' => $liked,
+            'likes_count' => $post->likes_count
+        ]);
+    }
+
+    /**
+     * Post a comment on a blog post.
+     */
+    public function comment(Request $request, $slug)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+            'parent_id' => 'nullable|exists:blog_comments,id'
+        ]);
+
+        $post = BlogPost::published()->where('slug', $slug)->firstOrFail();
+        
+        $comment = $post->comments()->create([
+            'user_id' => auth()->id(),
+            'parent_id' => $request->parent_id,
+            'content' => $request->content,
+            'status' => 'approved', // Auto-approve for now, or use pending based on settings
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
+        $post->increment('comments_count');
+
+        return response()->json([
+            'message' => 'Comment posted successfully',
+            'data' => $comment
+        ], 201);
+    }
+
+    /**
+     * Increment share count.
+     */
+    public function share($slug)
+    {
+        $post = BlogPost::published()->where('slug', $slug)->firstOrFail();
+        $post->increment('shares_count');
+
+        return response()->json([
+            'shares_count' => $post->shares_count
+        ]);
     }
 }

@@ -37,6 +37,13 @@ Route::prefix('blog')->group(function () {
     Route::get('/posts/featured', [\App\Http\Controllers\Api\BlogController::class, 'featured']);
     Route::get('/posts/{slug}', [\App\Http\Controllers\Api\BlogController::class, 'show']);
     Route::get('/categories', [\App\Http\Controllers\Api\BlogController::class, 'categories']);
+    Route::post('/posts/{slug}/share', [\App\Http\Controllers\Api\BlogController::class, 'share']);
+});
+
+// Authenticated Blog Routes
+Route::middleware(['auth.jwt'])->prefix('blog')->group(function () {
+    Route::post('/posts/{slug}/like', [\App\Http\Controllers\Api\BlogController::class, 'like']);
+    Route::post('/posts/{slug}/comment', [\App\Http\Controllers\Api\BlogController::class, 'comment']);
 });
 
 // Admin Routes
