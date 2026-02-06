@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
+use App\Models\BlogCategory;
 use App\Http\Resources\Api\Admin\BlogPostResource;
 use App\Http\Resources\Api\Admin\BlogCategoryResource;
 use Illuminate\Http\Request;
