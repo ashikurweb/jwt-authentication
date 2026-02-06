@@ -70,4 +70,12 @@ Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
     Route::patch('/currencies/{currency}/set-default', [\App\Http\Controllers\API\CurrencyController::class, 'setDefault']);
     Route::get('/currencies/default', [\App\Http\Controllers\API\CurrencyController::class, 'getDefault']);
     Route::get('/currencies/active', [\App\Http\Controllers\API\CurrencyController::class, 'getActive']);
+    
+    // Multi-Currency Routes
+    Route::post('/currencies/convert', [\App\Http\Controllers\API\CurrencyController::class, 'convert']);
+    Route::post('/currencies/format', [\App\Http\Controllers\API\CurrencyController::class, 'format']);
+    Route::get('/currencies/exchange-rates', [\App\Http\Controllers\API\CurrencyController::class, 'exchangeRates']);
+    Route::post('/currencies/set-user-currency', [\App\Http\Controllers\API\CurrencyController::class, 'setUserCurrency']);
+    Route::get('/currencies/get-user-currency', [\App\Http\Controllers\API\CurrencyController::class, 'getUserCurrency']);
+    Route::post('/currencies/clear-cache', [\App\Http\Controllers\API\CurrencyController::class, 'clearCache']);
 });

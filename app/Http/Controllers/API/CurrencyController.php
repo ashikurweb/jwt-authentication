@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Http\Requests\API\CurrencyRequest;
+use App\Services\MultiCurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -172,6 +173,121 @@ class CurrencyController extends Controller
 
         return response()->json([
             'data' => $currencies
+        ]);
+    }
+
+    /**
+     * Convert currency amount.
+     */
+    public function convert(Request $request): JsonResponse
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'from' => 'required|string|max:3',
+            'to' => 'required|string|max:3',
+        ]);
+
+        try {
+            $convertedAmount = MultiCurrencyService::convert(
+                $request->amount,
+                $request->from,
+                $request->to
+            );
+
+            return response()->json([
+                'message' => 'Currency converted successfully',
+                'data' => [
+                    'original_amount' => $request->amount,
+                    'from_currency' => $request->from,
+                    'to_currency' => $request->to,
+                    'converted_amount' => $convertedAmount,
+                    'formatted' => MultiCurrencyService::format($convertedAmount, $request->to),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
+     * Format currency amount.
+     */
+    public function format(Request $request): JsonResponse
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'currency' => 'nullable|string|max:3',
+        ]);
+
+        $formatted = MultiCurrencyService::format($request->amount, $request->currency);
+
+        return response()->json([
+            'message' => 'Amount formatted successfully',
+            'data' => [
+                'amount' => $request->amount,
+                'currency' => $request->currency ?: 'USD',
+                'formatted' => $formatted,
+            ]
+        ]);
+    }
+
+    /**
+     * Get exchange rates.
+     */
+    public function exchangeRates(): JsonResponse
+    {
+        $rates = MultiCurrencyService::getExchangeRates();
+
+        return response()->json([
+            'message' => 'Exchange rates retrieved successfully',
+            'data' => $rates
+        ]);
+    }
+
+    /**
+     * Set user currency preference.
+     */
+    public function setUserCurrency(Request $request): JsonResponse
+    {
+        $request->validate([
+            'currency_code' => 'required|string|max:3|exists:currencies,code',
+        ]);
+
+        MultiCurrencyService::setUserCurrency($request->currency_code);
+
+        return response()->json([
+            'message' => 'User currency preference saved',
+            'data' => [
+                'currency_code' => $request->currency_code,
+                'currency' => MultiCurrencyService::getCurrency($request->currency_code),
+            ]
+        ]);
+    }
+
+    /**
+     * Get user currency preference.
+     */
+    public function getUserCurrency(): JsonResponse
+    {
+        $currency = MultiCurrencyService::getUserCurrency();
+
+        return response()->json([
+            'message' => 'User currency retrieved successfully',
+            'data' => $currency
+        ]);
+    }
+
+    /**
+     * Clear currency cache.
+     */
+    public function clearCache(): JsonResponse
+    {
+        MultiCurrencyService::clearCache();
+
+        return response()->json([
+            'message' => 'Currency cache cleared successfully'
         ]);
     }
 }
