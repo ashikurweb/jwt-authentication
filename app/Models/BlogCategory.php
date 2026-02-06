@@ -23,8 +23,6 @@ class BlogCategory extends Model
         'name',
         'slug',
         'description',
-        'image',
-        'icon',
         'color',
         'parent_id',
         'is_active',

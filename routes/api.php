@@ -48,8 +48,15 @@ Route::middleware(['auth.jwt'])->prefix('blog')->group(function () {
 
 // Admin Routes
 Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
+    Route::get('/categories/all', [\App\Http\Controllers\Api\Admin\CategoryController::class, 'getAll']);
+    Route::apiResource('categories', \App\Http\Controllers\Api\Admin\CategoryController::class);
+    Route::patch('/categories/{category}/toggle-featured', [\App\Http\Controllers\Api\Admin\CategoryController::class, 'toggleFeatured']);
+    Route::patch('/categories/{category}/toggle-status', [\App\Http\Controllers\Api\Admin\CategoryController::class, 'toggleStatus']);
+
     Route::get('/blog-categories/all', [\App\Http\Controllers\Api\Admin\BlogCategoryController::class, 'getAll']);
     Route::apiResource('blog-categories', \App\Http\Controllers\Api\Admin\BlogCategoryController::class);
+    Route::patch('/blog-categories/{blogCategory}/toggle-featured', [\App\Http\Controllers\Api\Admin\BlogCategoryController::class, 'toggleFeatured']);
+    Route::patch('/blog-categories/{blogCategory}/toggle-status', [\App\Http\Controllers\Api\Admin\BlogCategoryController::class, 'toggleStatus']);
 
     Route::get('/blog-tags/all', [\App\Http\Controllers\Api\Admin\BlogTagController::class, 'getAll']);
     Route::apiResource('blog-tags', \App\Http\Controllers\Api\Admin\BlogTagController::class);

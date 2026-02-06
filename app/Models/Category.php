@@ -13,17 +13,22 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes, HasSlug;
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $fillable = [
         'parent_id',
         'name',
         'slug',
         'description',
-        'icon',
-        'image',
         'color',
         'is_featured',
         'is_active',
-        'order',
         'meta',
     ];
 
@@ -72,9 +77,12 @@ class Category extends Model
         return $query->whereNull('parent_id');
     }
 
-    public function scopeOrdered($query)
+    public function scopeSearch($query, $search)
     {
-        return $query->orderBy('order');
+        return $query->where(function($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('description', 'LIKE', "%{$search}%");
+        });
     }
 
     // ========== Helpers ==========

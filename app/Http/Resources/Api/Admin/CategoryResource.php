@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BlogCategoryResource extends JsonResource
+class CategoryResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -15,13 +15,13 @@ class BlogCategoryResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'parent_id' => $this->parent_id,
-            'parent' => new BlogCategoryResource($this->whenLoaded('parent')),
+            'parent' => new CategoryResource($this->whenLoaded('parent')),
+            'children' => CategoryResource::collection($this->whenLoaded('children')),
             'is_active' => (bool) $this->is_active,
             'is_featured' => (bool) $this->is_featured,
             'color' => $this->color,
-            'posts_count' => $this->posts_count,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
+            'courses_count' => $this->courses_count,
+            'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -132,9 +132,6 @@
                     :class="category.is_active ? 'translate-x-5' : 'translate-x-0'"
                   ></div>
                 </div>
-                <span class="text-[8px] font-black uppercase tracking-widest text-inherit" :class="category.is_active ? 'theme-text-main' : 'theme-text-dim opacity-50'">
-                  {{ category.is_active ? 'Online' : 'Hidden' }}
-                </span>
               </button>
             </div>
 
@@ -207,16 +204,12 @@
               />
 
 
-              <div class="space-y-2">
-                <label class="text-[10px] font-black theme-text-dim uppercase tracking-[0.2em] ml-2">Parent Category</label>
-                <select 
-                  v-model="form.parent_id"
-                  class="w-full px-6 py-4 rounded-2xl theme-bg-element border-2 theme-border outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-bold theme-text-main appearance-none"
-                >
-                  <option :value="null">None (Primary)</option>
-                  <option v-for="cat in allCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                </select>
-              </div>
+              <FormDropdown
+                v-model="form.parent_id"
+                label="Parent Category"
+                placeholder="None (Primary)"
+                :options="parentCategoryOptions"
+              />
 
                 <FormInput 
                   v-model="form.color"
@@ -294,9 +287,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { blogCategoryService } from '../../../services/blogCategoryService';
 import FormInput from '../../../components/common/FormInput.vue';
+import FormDropdown from '../../../components/common/FormDropdown.vue';
 import ActionDialog from '../../../components/common/ActionDialog.vue';
 import Pagination from '../../../components/common/Pagination.vue';
 import SkeletonLoader from '../../../components/common/SkeletonLoader.vue';
@@ -336,6 +330,13 @@ const form = reactive({
 });
 
 const errors = ref({});
+
+const parentCategoryOptions = computed(() => {
+  return allCategories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
+  }));
+});
 
 const fetchCategories = async (page = 1) => {
   loading.value = true;
@@ -467,10 +468,9 @@ const confirmDelete = async () => {
 
 const toggleStatus = async (category) => {
   try {
-    const newStatus = !category.is_active;
-    await blogCategoryService.update(category.slug, { is_active: newStatus });
-    category.is_active = newStatus;
-    toast.success(`Category ${newStatus ? 'activated' : 'hidden'} successfully`);
+    await blogCategoryService.toggleStatus(category.slug);
+    category.is_active = !category.is_active;
+    toast.success(`Category ${category.is_active ? 'activated' : 'hidden'} successfully`);
   } catch (error) {
     toast.error('Failed to update status');
   }
@@ -478,10 +478,9 @@ const toggleStatus = async (category) => {
 
 const toggleFeatured = async (category) => {
   try {
-    const newFeatured = !category.is_featured;
-    await blogCategoryService.update(category.slug, { is_featured: newFeatured });
-    category.is_featured = newFeatured;
-    toast.success(`Category ${newFeatured ? 'marked as featured' : 'removed from featured'}`);
+    await blogCategoryService.toggleFeatured(category.slug);
+    category.is_featured = !category.is_featured;
+    toast.success(`Category ${category.is_featured ? 'marked as featured' : 'removed from featured'}`);
   } catch (error) {
     toast.error('Failed to update featured status');
   }

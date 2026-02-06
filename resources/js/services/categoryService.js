@@ -1,8 +1,8 @@
 import api from './api';
 
-const API_URL = '/admin/blog-categories';
+const API_URL = '/admin/categories';
 
-export const blogCategoryService = {
+export const categoryService = {
     async index(params = {}) {
         const response = await api.get(API_URL, { params });
         return response.data;

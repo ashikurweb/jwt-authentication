@@ -3,23 +3,23 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BlogCategory;
-use App\Http\Requests\Api\Admin\BlogCategoryRequest;
-use App\Http\Resources\Api\Admin\BlogCategoryResource;
+use App\Models\Category;
+use App\Http\Requests\Api\Admin\CategoryRequest;
+use App\Http\Resources\Api\Admin\CategoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-class BlogCategoryController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the categories.
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $categories = BlogCategory::query()
-            ->with(['parent']) // Eager Load parent to prevent N+1 in listing
-            ->withCount('posts')
+        $categories = Category::query()
+            ->with(['parent'])
+            ->withCount('courses')
             ->when($request->search, fn($q, $search) => $q->search($search))
             ->when($request->has('status'), function ($query) use ($request) {
                 $query->where('is_active', $request->status === 'active');
@@ -27,55 +27,55 @@ class BlogCategoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($request->per_page ?? 10);
 
-        return BlogCategoryResource::collection($categories);
+        return CategoryResource::collection($categories);
     }
 
     /**
      * Store a newly created category.
      */
-    public function store(BlogCategoryRequest $request): JsonResponse
+    public function store(CategoryRequest $request): JsonResponse
     {
-        $category = BlogCategory::create($request->validated());
+        $category = Category::create($request->validated());
 
         return response()->json([
             'message' => 'Category created successfully',
-            'category' => new BlogCategoryResource($category)
+            'category' => new CategoryResource($category)
         ], 201);
     }
 
     /**
      * Display the specified category.
      */
-    public function show(BlogCategory $blogCategory): BlogCategoryResource
+    public function show(Category $category): CategoryResource
     {
-        return new BlogCategoryResource($blogCategory->load('parent'));
+        return new CategoryResource($category->load(['parent', 'children']));
     }
 
     /**
      * Update the specified category.
      */
-    public function update(BlogCategoryRequest $request, BlogCategory $blogCategory): JsonResponse
+    public function update(CategoryRequest $request, Category $category): JsonResponse
     {
-        $blogCategory->update($request->validated());
+        $category->update($request->validated());
 
         return response()->json([
             'message' => 'Category updated successfully',
-            'category' => new BlogCategoryResource($blogCategory)
+            'category' => new CategoryResource($category)
         ]);
     }
 
     /**
      * Remove the specified category.
      */
-    public function destroy(BlogCategory $blogCategory): JsonResponse
+    public function destroy(Category $category): JsonResponse
     {
-        if ($blogCategory->posts()->exists()) {
+        if ($category->courses()->exists() || $category->children()->exists()) {
             return response()->json([
-                'message' => 'Cannot delete category with associated posts'
+                'message' => 'Cannot delete category with associated courses or subcategories'
             ], 422);
         }
 
-        $blogCategory->delete();
+        $category->delete();
 
         return response()->json([
             'message' => 'Category deleted successfully'
@@ -87,33 +87,33 @@ class BlogCategoryController extends Controller
      */
     public function getAll(): JsonResponse
     {
-        $categories = BlogCategory::select('id', 'name')->orderBy('name')->get();
+        $categories = Category::select('id', 'name', 'parent_id')->orderBy('name')->get();
         return response()->json($categories);
     }
 
     /**
      * Toggle featured status.
      */
-    public function toggleFeatured(BlogCategory $blogCategory): JsonResponse
+    public function toggleFeatured(Category $category): JsonResponse
     {
-        $blogCategory->update(['is_featured' => !$blogCategory->is_featured]);
+        $category->update(['is_featured' => !$category->is_featured]);
 
         return response()->json([
             'message' => 'Featured status updated successfully',
-            'category' => new BlogCategoryResource($blogCategory)
+            'category' => new CategoryResource($category)
         ]);
     }
 
     /**
      * Toggle active status.
      */
-    public function toggleStatus(BlogCategory $blogCategory): JsonResponse
+    public function toggleStatus(Category $category): JsonResponse
     {
-        $blogCategory->update(['is_active' => !$blogCategory->is_active]);
+        $category->update(['is_active' => !$category->is_active]);
 
         return response()->json([
             'message' => 'Status updated successfully',
-            'category' => new BlogCategoryResource($blogCategory)
+            'category' => new CategoryResource($category)
         ]);
     }
 }

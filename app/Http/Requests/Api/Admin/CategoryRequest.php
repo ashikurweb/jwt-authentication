@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BlogCategoryRequest extends FormRequest
+class CategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,12 +16,11 @@ class BlogCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'parent_id' => 'nullable|exists:blog_categories,id',
+            'parent_id' => 'nullable|exists:categories,id',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'color' => 'nullable|string|max:20',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string',
+            'meta' => 'nullable|array',
         ];
     }
 }
