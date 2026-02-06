@@ -48,15 +48,15 @@ class BlogComment extends Model
         return $this->hasMany(BlogComment::class, 'parent_id');
     }
 
+    public function allReplies()
+    {
+        return $this->replies()->approved()->with(['user', 'allReplies']);
+    }
+
     // Scopes
     public function scopeApproved($query)
     {
         return $query->where('status', 'approved');
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
     }
 
     public function scopeTopLevel($query)

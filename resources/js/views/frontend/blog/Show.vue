@@ -427,56 +427,6 @@ const submitComment = async () => {
   }
 };
 
-const submitReply = async (commentId) => {
-  if (!isAuthenticated.value) {
-    toast.error('Please login to reply');
-    return;
-  }
-  if (!replyContent.value.trim()) return;
-
-  try {
-    const response = await publicBlogService.commentOnPost(post.value.slug, {
-      content: replyContent.value,
-      parent_id: commentId
-    });
-
-    // Function to find and add reply to nested comment structure
-    const addReplyToComment = (comments, targetId) => {
-      for (let comment of comments) {
-        if (comment.id === targetId) {
-          if (!comment.replies) comment.replies = [];
-          const replyObj = {
-            ...response.data,
-            author: {
-              name: user.value.name,
-              avatar: user.value.avatar
-            },
-            created_at: new Date().toISOString()
-          };
-          comment.replies.push(replyObj);
-          post.value.comments_count++;
-          return true;
-        }
-        if (comment.replies && comment.replies.length > 0) {
-          if (addReplyToComment(comment.replies, targetId)) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
-    // Add reply to the correct comment (main comment or nested reply)
-    addReplyToComment(post.value.comments, commentId);
-
-    // Clear the reply field and close reply form
-    replyingTo.value = null;
-    replyContent.value = '';
-    toast.success('Reply posted successfully');
-  } catch (error) {
-    toast.error('Failed to post reply');
-  }
-};
 
 const submitReplyToComment = async (commentId, content) => {
   if (!isAuthenticated.value) {
@@ -494,21 +444,22 @@ const submitReplyToComment = async (commentId, content) => {
     const addReplyToComment = (comments, targetId) => {
       for (let comment of comments) {
         if (comment.id === targetId) {
-          if (!comment.replies) comment.replies = [];
+          if (!comment.allReplies) comment.allReplies = [];
           const replyObj = {
             ...response.data,
             author: {
               name: user.value.name,
               avatar: user.value.avatar
             },
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            allReplies: [] // Initialize empty replies for new comment
           };
-          comment.replies.push(replyObj);
+          comment.allReplies.push(replyObj);
           post.value.comments_count++;
           return true;
         }
-        if (comment.replies && comment.replies.length > 0) {
-          if (addReplyToComment(comment.replies, targetId)) {
+        if (comment.allReplies && comment.allReplies.length > 0) {
+          if (addReplyToComment(comment.allReplies, targetId)) {
             return true;
           }
         }

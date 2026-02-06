@@ -81,6 +81,11 @@ class BlogPost extends Model
                 $minutes = ceil($words / 200);
                 $post->reading_time = $minutes;
             }
+            
+            // Auto-set published_at when status changes to published
+            if ($post->status === 'published' && !$post->published_at) {
+                $post->published_at = now();
+            }
         });
     }
 

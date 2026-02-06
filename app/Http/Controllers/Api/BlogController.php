@@ -4,18 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
-use App\Models\BlogCategory;
 use App\Http\Resources\Api\Admin\BlogPostResource;
 use App\Http\Resources\Api\Admin\BlogCategoryResource;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class BlogController extends Controller
 {
     /**
      * Display a listing of published blog posts.
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request)
     {
         $posts = BlogPost::query()
             ->with(['author', 'category', 'tags'])
@@ -37,9 +35,7 @@ class BlogController extends Controller
         $post = BlogPost::query()
             ->with(['author', 'category', 'tags', 'comments' => function($q) {
                 $q->where('status', 'approved')->whereNull('parent_id')
-                  ->with(['user', 'replies' => function($cq) {
-                      $cq->where('status', 'approved')->with('user');
-                  }]);
+                  ->with(['user', 'allReplies']);
             }])
             ->published()
             ->where('slug', $slug)

@@ -20,7 +20,7 @@ class BlogCommentResource extends JsonResource
                 'avatar' => $this->user ? $this->user->avatar : null,
             ],
             'created_at' => $this->created_at,
-            'replies' => BlogCommentResource::collection($this->whenLoaded('replies')),
+            'allReplies' => BlogCommentResource::collection($this->whenLoaded('allReplies')),
         ];
     }
 }
