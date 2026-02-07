@@ -63,6 +63,12 @@ Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
 
     Route::apiResource('blog-posts', \App\Http\Controllers\Api\Admin\BlogPostController::class);
 
+    // User/Student Routes
+    Route::apiResource('student', \App\Http\Controllers\Api\Admin\UserController::class)->parameters([
+        'student' => 'user'
+    ]);
+    Route::patch('/student/{user}/toggle-status', [\App\Http\Controllers\Api\Admin\UserController::class, 'toggleStatus']);
+
     // Instructor Routes
     Route::apiResource('instructors', \App\Http\Controllers\Api\Admin\InstructorController::class);
     Route::patch('/instructors/{instructor}/toggle-featured', [\App\Http\Controllers\Api\Admin\InstructorController::class, 'toggleFeatured']);

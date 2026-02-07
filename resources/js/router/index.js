@@ -87,7 +87,13 @@ const routes = [
             { path: 'blog/posts/create', name: 'blog-posts.create', component: () => import('../views/admin/blog-posts/Create.vue') },
             { path: 'blog/posts/:slug/edit', name: 'blog-posts.edit', component: () => import('../views/admin/blog-posts/Edit.vue') },
             // Users
-            { path: 'users', name: 'users', component: () => import('../views/admin/users/Index.vue') },
+            {
+                path: 'student',
+                children: [
+                    { path: '', name: 'users.index', component: () => import('../views/admin/users/Index.vue') },
+                    { path: ':uuid', name: 'users.show', component: () => import('../views/admin/users/Show.vue') },
+                ]
+            },
             {
                 path: 'instructors',
                 children: [

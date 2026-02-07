@@ -112,4 +112,22 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 
         return asset('storage/' . $this->avatar);
     }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Student Enrollments
+     */
+    public function student_enrollments()
+    {
+        return $this->hasMany(\App\Models\Enrollment::class, 'user_id');
+    }
 }

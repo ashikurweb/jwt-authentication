@@ -146,6 +146,8 @@ class AuthService
         }
 
         $token = auth('api')->login($user);
+        $this->updateLoginInfo($user);
+        
         return ['status' => 'success', 'token' => $token, 'user' => $user];
     }
 
@@ -159,7 +161,10 @@ class AuthService
         }
 
         $user->update(['otp' => null, 'otp_expires_at' => null]);
-        return auth('api')->login($user);
+        $token = auth('api')->login($user);
+        $this->updateLoginInfo($user);
+        
+        return $token;
     }
 
     /**
@@ -168,5 +173,16 @@ class AuthService
     public function generateToken($user)
     {
         return auth('api')->login($user);
+    }
+
+    /**
+     * Update user login information
+     */
+    protected function updateLoginInfo(User $user): void
+    {
+        $user->update([
+            'last_login_at' => Carbon::now(),
+            'last_login_ip' => request()->ip(),
+        ]);
     }
 }
