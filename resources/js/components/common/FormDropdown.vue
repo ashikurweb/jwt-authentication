@@ -42,34 +42,52 @@
       >
         <div 
           v-if="isOpen" 
-          class="absolute z-[60] left-0 right-0 mt-2 p-2 theme-bg-card border theme-border rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] max-h-60 overflow-y-auto custom-scrollbar"
+          class="absolute z-[60] left-0 right-0 mt-2 p-2 theme-bg-card border theme-border rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
         >
-          <div v-if="options.length === 0" class="px-4 py-3 text-xs theme-text-muted italic">
-            No options available
-          </div>
-          <button
-            v-for="option in options"
-            :key="option.value"
-            type="button"
-            @click="select(option)"
-            class="w-full px-4 py-3 rounded-xl text-left text-sm font-bold transition-all flex items-center justify-between group"
-            :class="[
-              modelValue === option.value 
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
-                : 'theme-text-main hover:theme-bg-sidebar hover:theme-text-main'
-            ]"
-          >
-            {{ option.label }}
-            <svg 
-              v-if="modelValue === option.value" 
-              class="w-4 h-4 text-white" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
+          <!-- Search Input -->
+          <div v-if="searchable" class="px-2 pb-2 mb-2 border-b theme-border sticky top-0 bg-inherit z-10">
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="Search..." 
+              class="w-full px-4 py-2 rounded-xl theme-bg-element text-sm font-bold theme-text-main outline-none focus:ring-2 focus:ring-indigo-500/20"
+              @click.stop
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-            </svg>
-          </button>
+          </div>
+
+          <div class="max-h-80 overflow-y-auto custom-scrollbar">
+            <div v-if="filteredOptions.length === 0" class="p-4">
+              <EmptyState 
+                :title="searchQuery ? 'No matched found' : 'No options available'"
+                :message="searchQuery ? `We couldn't find any options matching '${searchQuery}'` : 'There are no options to select from.'"
+                :compact="true"
+                class="!py-6 !border-0 !shadow-none !bg-transparent"
+              />
+            </div>
+            <button
+              v-for="option in filteredOptions"
+              :key="option.value"
+              type="button"
+              @click="select(option)"
+              class="w-full px-4 py-3 rounded-xl text-left text-sm font-bold transition-all flex items-center justify-between group"
+              :class="[
+                modelValue === option.value 
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
+                  : 'theme-text-main hover:theme-bg-sidebar hover:theme-text-main'
+              ]"
+            >
+              {{ option.label }}
+              <svg 
+                v-if="modelValue === option.value" 
+                class="w-4 h-4 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </transition>
     </div>
@@ -84,13 +102,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import EmptyState from './EmptyState.vue';
 
 const props = defineProps({
   modelValue: [String, Number],
   options: {
     type: Array,
-    default: () => [] // [{ label: 'Draft', value: 'draft' }]
+    default: () => [] 
   },
   label: String,
   placeholder: {
@@ -98,18 +117,42 @@ const props = defineProps({
     default: 'Select an option'
   },
   required: Boolean,
-  error: [String, Array]
+  error: [String, Array],
+  searchable: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
 
 const isOpen = ref(false);
+const searchQuery = ref('');
 
-const toggle = () => isOpen.value = !isOpen.value;
-const close = () => isOpen.value = false;
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+  if (!isOpen.value) {
+    searchQuery.value = ''; // Reset search on close
+  }
+};
+
+const close = () => {
+  isOpen.value = false;
+  searchQuery.value = '';
+};
 
 const selectedOption = computed(() => {
   return props.options.find(opt => opt.value === props.modelValue);
+});
+
+const filteredOptions = computed(() => {
+  if (!searchQuery.value) {
+    return props.options;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return props.options.filter(option => 
+    option.label.toLowerCase().includes(query)
+  );
 });
 
 const select = (option) => {
@@ -118,7 +161,6 @@ const select = (option) => {
   close();
 };
 
-// Simple directive for clicking outside
 const vClickOutside = {
   mounted(el, binding) {
     el._clickOutside = (event) => {

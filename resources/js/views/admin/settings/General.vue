@@ -57,25 +57,16 @@
         </div>
 
         <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-black theme-text-dim uppercase tracking-widest mb-2">Application Timezone</label>
-            <div class="relative">
-              <select
-                v-model="form.app_timezone"
-                class="w-full px-4 py-4 pr-12 theme-bg-element border theme-border rounded-2xl text-sm font-bold theme-text-main outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer"
-              >
-                <optgroup v-for="(zones, region) in timezones" :key="region" :label="region">
-                  <option v-for="zone in zones" :key="zone.value" :value="zone.value">
-                    {{ zone.label }} ({{ zone.offset }})
-                  </option>
-                </optgroup>
-              </select>
-              <svg class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 theme-text-dim pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
-            <p class="text-xs theme-text-muted mt-2">All dates and times will be displayed in this timezone.</p>
-          </div>
+          <!-- Timezone Dropdown -->
+          <FormDropdown
+            v-model="form.app_timezone"
+            :options="timezoneOptions"
+            label="Application Timezone"
+            placeholder="Select Timezone"
+            :searchable="true"
+            @change="updateClock"
+          />
+          <p class="text-xs theme-text-muted -mt-2 ml-2">All dates and times will be displayed in this timezone.</p>
 
           <!-- Auto-detect Button -->
           <button
@@ -93,7 +84,7 @@
       </div>
 
       <!-- Date & Time Format Section -->
-      <div class="theme-bg-card border theme-border rounded-[2rem] p-6 lg:p-8 shadow-sm">
+      <div class="theme-bg-card border theme-border rounded-4xl p-6 lg:p-8 shadow-sm">
         <div class="flex items-center gap-4 mb-6">
           <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,19 +98,13 @@
         </div>
 
         <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-black theme-text-dim uppercase tracking-widest mb-2">Date Format</label>
-            <select
-              v-model="form.date_format"
-              class="w-full px-4 py-4 pr-12 theme-bg-element border theme-border rounded-2xl text-sm font-bold theme-text-main outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer"
-            >
-              <option value="M d, Y">Feb 07, 2026</option>
-              <option value="d M, Y">07 Feb, 2026</option>
-              <option value="Y-m-d">2026-02-07</option>
-              <option value="d/m/Y">07/02/2026</option>
-              <option value="m/d/Y">02/07/2026</option>
-            </select>
-          </div>
+          <!-- Date Format Dropdown -->
+          <FormDropdown
+            v-model="form.date_format"
+            :options="dateFormatOptions"
+            label="Date Format"
+            placeholder="Select Date Format"
+          />
 
           <div>
             <label class="block text-xs font-black theme-text-dim uppercase tracking-widest mb-2">Time Format</label>
@@ -276,9 +261,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { settingsService } from '../../../services/settingsService';
 import { useToast } from '../../../composables/useToast';
+import FormDropdown from '../../../components/common/FormDropdown.vue';
 
 const toast = useToast();
 const loading = ref(true);
@@ -293,6 +279,27 @@ const form = reactive({
 });
 
 const timezones = ref({});
+
+const timezoneOptions = computed(() => {
+  const options = [];
+  Object.keys(timezones.value).forEach(region => {
+    timezones.value[region].forEach(zone => {
+      options.push({
+        label: `${zone.label} (${zone.offset})`,
+        value: zone.value
+      });
+    });
+  });
+  return options;
+});
+
+const dateFormatOptions = [
+  { label: 'Feb 07, 2026 (M d, Y)', value: 'M d, Y' },
+  { label: '07 Feb, 2026 (d M, Y)', value: 'd M, Y' },
+  { label: '2026-02-07 (Y-m-d)', value: 'Y-m-d' },
+  { label: '07/02/2026 (d/m/Y)', value: 'd/m/Y' },
+  { label: '02/07/2026 (m/d/Y)', value: 'm/d/Y' },
+];
 
 // Live Clock State
 const clockDisplay = reactive({
