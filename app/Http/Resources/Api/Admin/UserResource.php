@@ -24,8 +24,8 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar_url,
             'status' => $this->status,
             'is_active' => $this->status === 'active',
-            'created_at' => $this->created_at->format('M d, Y'),
-            'last_login_at' => $this->last_login_at ? $this->last_login_at->format('M d, Y h:i A') : 'Never',
+            'created_at' => format_date($this->created_at),
+            'last_login_at' => $this->last_login_at ? format_datetime($this->last_login_at) : 'Never',
             'roles' => $this->getRoleNames() ?? [],
             // You can add more progress-related data here later
             'courses_count' => $this->student_enrollments_count ?? 0, 

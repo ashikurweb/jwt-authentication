@@ -93,4 +93,12 @@ Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
     Route::post('/currencies/set-user-currency', [\App\Http\Controllers\API\CurrencyController::class, 'setUserCurrency']);
     Route::get('/currencies/get-user-currency', [\App\Http\Controllers\API\CurrencyController::class, 'getUserCurrency']);
     Route::post('/currencies/clear-cache', [\App\Http\Controllers\API\CurrencyController::class, 'clearCache']);
+    
+    // Settings Routes
+    Route::get('/settings', [\App\Http\Controllers\Api\Admin\SettingController::class, 'index']);
+    Route::get('/settings/general', [\App\Http\Controllers\Api\Admin\SettingController::class, 'general']);
+    Route::get('/settings/group/{group}', [\App\Http\Controllers\Api\Admin\SettingController::class, 'group']);
+    Route::get('/settings/timezones', [\App\Http\Controllers\Api\Admin\SettingController::class, 'timezones']);
+    Route::post('/settings', [\App\Http\Controllers\Api\Admin\SettingController::class, 'update']);
+    Route::post('/settings/single', [\App\Http\Controllers\Api\Admin\SettingController::class, 'updateSingle']);
 });

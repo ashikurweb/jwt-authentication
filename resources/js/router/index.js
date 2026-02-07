@@ -111,6 +111,7 @@ const routes = [
             { path: 'affiliates', name: 'affiliates', component: () => import('../views/admin/affiliates/Index.vue') },
             // Settings
             { path: 'settings', name: 'settings', component: () => import('../views/admin/settings/Index.vue') },
+            { path: 'settings/general', name: 'settings.general', component: () => import('../views/admin/settings/General.vue') },
             { path: 'current', name: 'current', component: () => import('../views/admin/current/Index.vue') },
             { path: 'currencies', name: 'currencies', component: () => import('../views/admin/currencies/Index.vue') }
         ]

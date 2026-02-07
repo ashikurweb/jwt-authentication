@@ -379,6 +379,9 @@ const handleSettingClick = (setting) => {
   if (setting.id === 7) {
     // Navigate to currencies page
     router.push({ name: 'currencies' });
+  } else if (setting.id === 1) {
+    // Navigate to general settings page
+    router.push({ name: 'settings.general' });
   } else {
     // Open modal for other settings
     openSettingsTable(setting);
