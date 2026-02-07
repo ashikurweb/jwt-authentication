@@ -62,6 +62,15 @@ Route::middleware(['auth.jwt'])->prefix('admin')->group(function () {
     Route::apiResource('blog-tags', \App\Http\Controllers\Api\Admin\BlogTagController::class);
 
     Route::apiResource('blog-posts', \App\Http\Controllers\Api\Admin\BlogPostController::class);
+
+    // Instructor Routes
+    Route::apiResource('instructors', \App\Http\Controllers\Api\Admin\InstructorController::class);
+    Route::patch('/instructors/{instructor}/toggle-featured', [\App\Http\Controllers\Api\Admin\InstructorController::class, 'toggleFeatured']);
+    Route::patch('/instructors/{instructor}/toggle-status', [\App\Http\Controllers\Api\Admin\InstructorController::class, 'toggleStatus']);
+
+    // Payout Routes
+    Route::apiResource('payouts', \App\Http\Controllers\Api\Admin\PayoutController::class);
+
     Route::post('upload-image', [\App\Http\Controllers\Api\Admin\UploadController::class, 'uploadImage']);
 
     // Currency Routes

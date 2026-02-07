@@ -63,9 +63,13 @@
             :key="post.id" 
             class="grid grid-cols-12 gap-4 items-center px-8 py-5 theme-bg-card border theme-border rounded-[1.5rem] shadow-sm transition-all duration-300 group"
           >
-            <!-- SL -->
+            <!-- SL Column - Premium Badge Style -->
             <div class="col-span-1">
-              <span class="text-xs font-black theme-text-dim tabular-nums">#{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</span>
+              <div class="w-10 h-10 rounded-xl theme-bg-element border theme-border flex items-center justify-center transition-all duration-500 group-hover:border-indigo-500/30 group-hover:bg-indigo-500/5">
+                <span class="text-[10px] font-black theme-text-dim group-hover:theme-text-main tabular-nums tracking-tighter">
+                  {{ (pagination.current_page - 1) * pagination.per_page + index + 1 < 10 ? '0' : '' }}{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}
+                </span>
+              </div>
             </div>
 
             <!-- Details -->

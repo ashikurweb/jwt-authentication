@@ -89,6 +89,17 @@ class InstructorPayout extends Model
         return $query->where('instructor_id', $instructorId);
     }
 
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function($q) use ($search) {
+            $q->where('transaction_id', 'LIKE', "%{$search}%")
+                ->orWhereHas('instructor', function($instructorQuery) use ($search) {
+                    $instructorQuery->where('name', 'LIKE', "%{$search}%")
+                        ->orWhere('email', 'LIKE', "%{$search}%");
+                });
+        });
+    }
+
     // ========== Helpers ==========
 
     public function process(string $transactionId, User $admin): void

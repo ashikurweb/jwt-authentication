@@ -25,7 +25,6 @@ return new class extends Migration
             $table->string('facebook')->nullable();
             $table->string('youtube')->nullable();
             $table->string('github')->nullable();
-            $table->string('profile_video')->nullable();
             $table->decimal('rating', 3, 2)->default(0.00);
             $table->integer('total_reviews')->default(0);
             $table->integer('total_students')->default(0);

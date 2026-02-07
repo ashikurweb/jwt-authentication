@@ -1,7 +1,10 @@
 <template>
   <div class="space-y-4">
     <div 
-      class="relative w-full aspect-video rounded-[2rem] theme-bg-element border-2 border-dashed theme-border flex flex-col items-center justify-center group overflow-hidden transition-all duration-500 hover:border-indigo-500/50"
+      class="relative rounded-[2rem] theme-bg-element border-2 border-dashed theme-border flex flex-col items-center justify-center group overflow-hidden transition-all duration-500 hover:border-indigo-500/50"
+      :class="[
+        aspect === 'square' ? 'aspect-square min-w-[280px]' : 'aspect-video w-full'
+      ]"
       @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
       @drop.prevent="handleDrop"
@@ -97,7 +100,8 @@ import { useToast } from '../../composables/useToast';
 
 const props = defineProps({
   modelValue: String,
-  folder: { type: String, default: 'uploads/others' }
+  folder: { type: String, default: 'uploads/others' },
+  aspect: { type: String, default: 'video' }
 });
 
 const emit = defineEmits(['update:modelValue']);

@@ -88,7 +88,15 @@ const routes = [
             { path: 'blog/posts/:slug/edit', name: 'blog-posts.edit', component: () => import('../views/admin/blog-posts/Edit.vue') },
             // Users
             { path: 'users', name: 'users', component: () => import('../views/admin/users/Index.vue') },
-            { path: 'instructors', name: 'instructors', component: () => import('../views/admin/instructors/Index.vue') },
+            {
+                path: 'instructors',
+                children: [
+                    { path: '', name: 'instructors', component: () => import('../views/admin/instructors/Index.vue') },
+                    { path: 'create', name: 'instructors.create', component: () => import('../views/admin/instructors/Create.vue') },
+                    { path: ':id', name: 'instructors.show', component: () => import('../views/admin/instructors/Show.vue') },
+                    { path: ':id/edit', name: 'instructors.edit', component: () => import('../views/admin/instructors/Edit.vue') },
+                ]
+            },
             { path: 'discussions', name: 'discussions', component: () => import('../views/admin/discussions/Index.vue') },
             { path: 'live-classes', name: 'live-classes', component: () => import('../views/admin/live-classes/Index.vue') },
             // Finance

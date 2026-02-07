@@ -96,6 +96,18 @@ class InstructorProfile extends Model
         return $query->orderByDesc('rating');
     }
 
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function($q) use ($search) {
+            $q->whereHas('user', function($userQuery) use ($search) {
+                $userQuery->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
+            })
+            ->orWhere('headline', 'LIKE', "%{$search}%")
+            ->orWhere('expertise', 'LIKE', "%{$search}%");
+        });
+    }
+
     // ========== Helpers ==========
 
     public function isApproved(): bool
